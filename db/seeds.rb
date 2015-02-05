@@ -1,67 +1,30 @@
-# Seed the airports and flights tables
+# Passenger.delete_all
+# Booking.delete_all
 
-Airport.delete_all
+Airport.delete_all   
+lax = Airport.create(code: "LAX", name: "Los Angeles")
+sfo = Airport.create(code: "SFO", name: "San Francisco")
+iad = Airport.create(code: "IAD", name: "Washington D.C.")
+jfk = Airport.create(code: "NYC", name: "New York City")
+
+duration = { "LAX_SFO" => 1.hour, "LAX_IAD" => 5.hours, "LAX_NYC" => 6.hours, "SFO_LAX" => 1.hour, "IAD_LAX" => 5.hours, "NYC_LAX" => 6.hours,
+             "SFO_IAD" => 9.hours, "SFO_NYC" => 8.hours, "IAD_SFO" => 9.hours, "NYC_SFO" => 8.hours, 
+             "IAD_NYC" => 1.hour, "NYC_IAD" => 1.hour }
+
 Flight.delete_all
 
-def create_data
-	airports_limit    = 5  # Create flights between this number of airports
-	avg_daily_flights = 7  # Create about this many flights each day
-	days_in_future    = 85 # Earliest flight created is this days from now
-	number_of_days    = 9  # Create flights till this number of days from
-	                       # the day of the earliest flight created
 
-	airports_to_create = airports_data[0..airports_limit - 1]
-	create_airports(airports_to_create)
-	create_flights(number_of_days, avg_daily_flights, days_in_future)
+Airport.all.each do |airport1|
+  Airport.all.each do |airport2|
+    unless airport1 == airport2
+      dur = duration["#{airport1.code}_#{airport2.code}"]
+      Flight.create(from_airport_id: airport1.id, to_airport_id: airport2.id, start_time: Time.now, duration: dur)
+      Flight.create(from_airport_id: airport1.id, to_airport_id: airport2.id, start_time: 3.hours.from_now, duration: dur)
+      Flight.create(from_airport_id: airport1.id, to_airport_id: airport2.id, start_time: 6.hours.from_now, duration: dur)
+      Flight.create(from_airport_id: airport1.id, to_airport_id: airport2.id, start_time: 1.day.from_now, duration: dur)
+      Flight.create(from_airport_id: airport1.id, to_airport_id: airport2.id, start_time: (1.day + 6.hours).from_now, duration: dur)
+      Flight.create(from_airport_id: airport1.id, to_airport_id: airport2.id, start_time: 2.days.from_now, duration: dur)
+      Flight.create(from_airport_id: airport1.id, to_airport_id: airport2.id, start_time: (2.days + 3.hours).from_now, duration: dur)
+    end
+  end
 end
-
-def airports_data
-	[ ["ATL", "Atlanta, GA"],           ["ORD", "Chicago, IL"],
-	  ["JFK", "New York, NY"],          ["SFO", "San Francisco, CA"],
-	  ["LAX", "Los Angeles, CA"],       ["MIA", "Miami, FL"],
-	  ["DFW", "Dallas/Fort Worth, TX"], ["DEN", "Denver, CO"],
-	  ["CLT", "Charlotte, NC"],         ["LAS", "Las Vegas, NV"] ]
-end
-
-def create_airports(airports_to_create)
-	airports_to_create.each do |airport|
-		Airport.create!({code: airport[0], location: airport[1]})
-	end
-end
-
-def random_flight
-	airlines = ["American Airlines", "Delta Air Lines", "Southwest Airlines",
-	            "United Airlines",   "US Airways"]
-	"#{airlines.sample} #{rand(1900) + 100}"
-end
-
-def random_duration
-	(rand(240) + 120).minutes
-end
-
-def random_start(days_from_now)
-	days_from_now.days.from_now.midnight + (60 * (rand(60 * 24)))
-end
-
-def create_flights(num_of_days, daily_flights, days_in_future)
-	airports = Airport.all
-
-	airports.each do |from_airport|
-		airports.each do |to_airport|
-			next if from_airport == to_airport
-			duration = random_duration
-			(days_in_future...days_in_future + num_of_days).each do |days_from_now|
-				number_of_flights = daily_flights + (rand(7) - 3)
-				number_of_flights.times do 
-					Flight.create!({ flight_number:   random_flight,
-						               start_time:      random_start(days_from_now),
-			                     duration:        duration,
-			                     from_airport_id: from_airport.id,
-			                     to_airport_id:   to_airport.id })
-	      end
-	    end
-		end
-	end
-end
-
-create_data
