@@ -1,0 +1,7 @@
+<h1> Confirmation </h1>
+
+<h3> Your going on a plane!, </h3>
+
+<p>You are flying from <%= @booking.flight.from_airport.code %>  ->  <%= @booking.flight.to_airport.code %></p>
+<p>On <%= @booking.flight.start_time.strftime("%A, %B %d, %Y") %>, </p>
+<p>At <%= @booking.flight.start_time.strftime('%I:%M:%S %p') %></p>

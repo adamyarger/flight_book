@@ -1,0 +1,13 @@
+<h1> Search Flights </h1>
+<div class="row">
+	<%= render 'search' %>
+	
+	<% if !@flights.none? %>
+		<%= render 'search_results' %>
+	<% end %>
+</div>
+
+
+
+
+
